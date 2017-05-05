@@ -1,19 +1,20 @@
 <?php
 
-namespace Dez\Url;
+namespace Colibri\URI;
 
-use Dez\DependencyInjection\Injectable;
-use Dez\EventDispatcher\Dispatcher as EventDispatcher;
-use Dez\Http\Request;
-use Dez\Router\Router;
+use Colibri\Http\Request;
 
 /**
- * @property Request request
- * @property Router router
- * @property EventDispatcher eventDispatcher
+ * Class Builder
+ * @package Colibri\URI
  */
-class Url extends Injectable
+class Builder
 {
+  
+  /**
+   * @var Request
+   */
+  protected $request;
   
   /**
    * @var string
@@ -26,29 +27,16 @@ class Url extends Injectable
   protected $basePath = '/';
   
   /**
-   * @return Request
+   * Builder constructor.
+   * @param Request $request
+   * @param string $base
+   * @param string $static
    */
-  public function getRequest()
+  public function __construct(Request $request, $base = '/', $static = '/')
   {
-    return $this->request;
+    $this->request = $request;
   }
-  
-  /**
-   * @return Router
-   */
-  public function getRouter()
-  {
-    return $this->router;
-  }
-  
-  /**
-   * @return EventDispatcher
-   */
-  public function getEventDispatcher()
-  {
-    return $this->eventDispatcher;
-  }
-  
+
   /**
    * @return string
    */
@@ -64,6 +52,7 @@ class Url extends Injectable
   public function setStaticPath($staticPath)
   {
     $this->staticPath = $staticPath;
+    
     return $this;
   }
   
@@ -82,41 +71,19 @@ class Url extends Injectable
   public function setBasePath($basePath)
   {
     $this->basePath = $basePath;
+    
     return $this;
   }
   
   /**
-   * @param $macros
-   * @param array $params
-   * @param array $query
-   * @return null|string
+   * @throws UriException
    */
-  public function create($macros, $params = null, array $query = [])
+  public function create()
   {
-    $builder = new Builder($macros, $this->prepareParameters($params), $this->getRouter());
-    
-    if ($builder->make()) {
-      return $this->path($builder->getLink(), $query);
-    } else {
-      return null;
-    }
-  }
-  
-  /**
-   * @param $queryParameters
-   * @return array $params
-   */
-  private function prepareParameters($queryParameters)
-  {
-    $params = [];
-    
-    if (is_string($queryParameters)) {
-      parse_str($queryParameters, $params);
-    } else if (is_array($queryParameters)) {
-      $params = $queryParameters;
-    }
-
-    return array_filter($params);;
+    throw new UriException(
+      'URL generator not implemented here. Please install package colibriphp/url-generator ' .
+      'and use class Colibri\\UrlGenerator\\UrlBuilder instead'
+    );
   }
   
   /**
@@ -128,7 +95,8 @@ class Url extends Injectable
   {
     $path = ltrim($path, '/');
     $basepath = rtrim($this->getBasePath(), '/');
-    return (new Uri("$basepath/$path"))->setQueryArray($query)->local();
+    
+    return (new Parser("$basepath/$path"))->setQueryArray($query)->local();
   }
   
   /**
@@ -140,7 +108,8 @@ class Url extends Injectable
   {
     $path = ltrim($path, '/');
     $staticpath = rtrim($this->getStaticPath(), '/');
-    return (new Uri("$staticpath/$path"))->local();
+    
+    return (new Parser("$staticpath/$path"))->local();
   }
   
   /**
@@ -154,7 +123,7 @@ class Url extends Injectable
     $path = ltrim($path, '/');
     $basepath = rtrim($this->getBasePath(), '/');
     
-    $uri = (new Uri("$basepath/$path"))
+    $uri = (new Parser("$basepath/$path"))
       ->setSchema($this->request->getSchema())
       ->setHost($this->request->getServerHttp('host'))
       ->setQueryArray($query);

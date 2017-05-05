@@ -1,12 +1,13 @@
 <?php
 
-namespace Dez\Url;
+namespace Colibri\URI;
+
 
 /**
- * Class Uri
- * @package Dez\Url
+ * Class Parser
+ * @package Colibri\URI
  */
-class Uri
+class Parser
 {
   
   /**

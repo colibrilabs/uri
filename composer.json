@@ -1,25 +1,22 @@
 {
-  "name": "dez-php/dez-url",
-  "description": "URL/URI/URLBuilder Component",
+  "name": "colibriphp/uri",
+  "description": "URL/URI Library",
   "keywords": ["php url", "url", "uri", "url builder", "dez-php url"],
   "authors": [
     {
-      "name": "Ivan Gontarenko",
-      "email": "vania.gontarenko@gmail.com"
+      "name": "Ivan Hontarenko",
+      "email": "stewie.dev@gmail.com"
     }
   ],
   "license": "MIT",
   "type": "library",
   "require": {
     "php": ">=5.5",
-    "dez-php/dez-di": ">=1.0",
-    "dez-php/dez-event": ">=1.0",
-    "dez-php/dez-http": ">=1.0",
-    "dez-php/dez-router": ">=1.0"
+    "colibriphp/http": "~0.1"
   },
   "autoload": {
     "psr-4": {
-      "Dez\\Url\\": "src/Url"
+      "Colibri\\URI\\": "src/"
     }
   }
 }
