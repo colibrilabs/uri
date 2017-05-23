@@ -1,5 +1,5 @@
 {
-  "name": "colibriphp/uri",
+  "name": "colibrilabs/uri",
   "description": "URL/URI Library",
   "keywords": ["php url", "url", "uri", "url builder", "dez-php url"],
   "authors": [
