@@ -16,7 +16,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Colibri\\URI\\": "src/"
+      "Subapp\\URI\\": "src/"
     }
   }
 }

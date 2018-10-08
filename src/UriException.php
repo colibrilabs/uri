@@ -1,12 +1,12 @@
 <?php
 
-namespace Colibri\URI;
+namespace Subapp\URI;
 
 /**
  * Class UriException
- * @package Colibri\URI
+ * @package Subapp\URI
  */
 class UriException extends \Exception
 {
-  
+
 }
