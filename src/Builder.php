@@ -10,129 +10,146 @@ use Subapp\Http\Request;
  */
 class Builder
 {
-    
+
     /**
      * @var Request
      */
     protected $request;
-    
+
     /**
      * @var string
      */
-    protected $staticPath = '/';
-    
+    protected $static = '/';
+
     /**
      * @var string
      */
-    protected $basePath = '/';
-    
+    protected $base = '/';
+
     /**
      * Builder constructor.
      * @param Request $request
-     * @param string  $base
-     * @param string  $static
      */
-    public function __construct(Request $request, $base = '/', $static = '/')
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
-    
+
     /**
      * @return string
      */
-    public function getStaticPath()
+    public function getStatic()
     {
-        return $this->staticPath;
+        return $this->static;
     }
-    
+
     /**
-     * @param string $staticPath
+     * @param string $static
      * @return $this
      */
-    public function setStaticPath($staticPath)
+    public function setStatic($static)
     {
-        $this->staticPath = $staticPath;
-        
+        $this->static = $static;
+
         return $this;
     }
-    
+
     /**
      * @return string
      */
-    public function getBasePath()
+    public function getBase()
     {
-        return $this->basePath;
+        return $this->base;
     }
-    
+
     /**
-     * @param string $basePath
+     * @param string $base
      * @return $this
      */
-    public function setBasePath($basePath)
+    public function setBase($base)
     {
-        $this->basePath = $basePath;
-        
+        $this->base = $base;
+
         return $this;
     }
-    
+
     /**
      * @throws UriException
      */
     public function create()
     {
         throw new UriException(
-            'URL generator not implemented here. Please install package colibriphp/url-generator ' .
+            'URL generator not implemented here. Please install package github.com/subapp/url-generator ' .
             'and use class Subapp\\UrlGenerator\\UrlBuilder instead'
         );
     }
-    
+
     /**
      * @param string $path
-     * @param array  $query
+     * @param array $query
      * @return string
      */
-    public function path($path = '', array $query = [])
+    public function path($path, array $query = [])
     {
-        $path = ltrim($path, '/');
-        $basepath = rtrim($this->getBasePath(), '/');
-        
-        return (new Parser("$basepath/$path"))->setQueryArray($query)->local();
+        $parser = new Parser($this->toBasePath($path));
+        $parser->setQuery($query);
+
+        return $path->local();
     }
-    
+
     /**
      * @param string $path
-     * @param array  $query
      * @return string
      */
-    public function staticPath($path = '', array $query = [])
+    public function staticPath($path)
     {
-        $path = ltrim($path, '/');
-        $staticpath = rtrim($this->getStaticPath(), '/');
-        
-        return (new Parser("$staticpath/$path"))->local();
+        return (new Parser($this->toStaticPath($path)))->local();
     }
-    
+
     /**
-     * @param string      $path
-     * @param array       $query
+     * @param string $path
+     * @param array $query
      * @param null|string $fragment
+     * @param null|string $schema
+     * @param null|string $domain
      * @return string
      */
-    public function full($path = '', array $query = [], $fragment = null)
+    public function full($path = '', array $query = [], $fragment = null, $schema = null, $domain = null)
+    {
+        $parser = new Parser($this->toBasePath($path));
+        $parser->setSchema($schema ? $schema : $this->request->getSchema());
+        $parser->setHost($domain ? $domain : $this->request->getServerHttp('host'));
+        $parser->setQuery($query);
+
+        if ($fragment) {
+            $parser->setFragment(ltrim($fragment, '#'));
+        }
+
+        return $parser->full();
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    public function toStaticPath($path)
     {
         $path = ltrim($path, '/');
-        $basepath = rtrim($this->getBasePath(), '/');
-        
-        $uri = (new Parser("$basepath/$path"))
-            ->setSchema($this->request->getSchema())
-            ->setHost($this->request->getServerHttp('host'))
-            ->setQueryArray($query);
-        
-        if ($fragment !== null) {
-            $uri->setFragment(ltrim($fragment, '#'));
-        }
-        
-        return $uri->full();
+        $static = rtrim($this->getStatic(), '/');
+
+        return "$static/$path";
     }
-    
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    public function toBasePath($path)
+    {
+        $path = ltrim($path, '/');
+        $base = rtrim($this->getBase(), '/');
+
+        return "$base/$path";
+    }
+
 }

@@ -47,14 +47,9 @@ class Parser
     protected $path;
     
     /**
-     * @var string
-     */
-    protected $queryString;
-    
-    /**
      * @var array
      */
-    protected $queryArray = [];
+    protected $query = [];
     
     /**
      * @var string
@@ -66,7 +61,6 @@ class Parser
      */
     public function __construct($uri)
     {
-        
         $components = parse_url($uri, -1);
         
         if (isset($components['scheme'])) {
@@ -91,13 +85,12 @@ class Parser
         
         if (isset($components['query'])) {
             $this->setQueryString($components['query']);
-            parse_str($components['query'], $this->queryArray);
+            parse_str($components['query'], $this->query);
         }
         
         if (isset($components['fragment'])) {
             $this->setFragment($components['fragment']);
         }
-        
     }
     
     /**
@@ -118,59 +111,35 @@ class Parser
         ];
         
         if (count($components) > 0) foreach ($components as $component) {
-            
             switch ($component) {
-                
                 case 'schema':
-                    if ($this->getSchema()) {
-                        $uriParts['schema'] = "{$this->getSchema()}://";
-                    }
+                    $uriParts['schema'] = !$this->getSchema() ?: "{$this->getSchema()}://";
                     break;
-                
                 case 'host':
-                    if ($this->getHost()) {
-                        $uriParts['host'] = $this->getHost();
-                    }
+                    $uriParts['host'] = !$this->getHost() ?: $this->getHost();
                     break;
-                
                 case 'user':
                     if ($this->getUser() && $this->getPassword()) {
                         $uriParts['credentials'] = "{$this->getUser()}:{$this->getPassword()}@";
-                    } elseif ($this->getUser()) {
+                    } else if ($this->getUser()) {
                         $uriParts['credentials'] = "{$this->getUser()}@";
                     }
                     break;
-                
                 case 'port':
-                    if ($this->getPort()) {
-                        $uriParts['port'] = ":{$this->getPort()}";
-                    }
+                    $uriParts['port'] = !$this->getPort() ?: ":{$this->getPort()}";
                     break;
-                
                 case 'path':
-                    if ($this->getPath()) {
-                        $uriParts['path'] = $this->getPath();
-                    } else {
-                        $uriParts['path'] = '/';
-                    }
+                    $uriParts['path'] = $this->getPath() ? $this->getPath() : '/';
                     break;
-                
                 case 'query':
-                    if (count($this->getQueryArray()) > 0) {
-                        $uriParts['query'] = '?' . $this->getQueryString();
-                    }
+                    $uriParts['query'] = !$this->getQuery() ?: ('?' . $this->getQueryString());
                     break;
-                
                 case 'fragment':
-                    if ($this->getFragment()) {
-                        $uriParts['fragment'] = '#' . $this->getFragment();
-                    }
+                    $uriParts['fragment'] = !$this->getFragment() ?: ('#' . $this->getFragment());
                     break;
-                
                 default:
                     break;
             }
-            
         }
         
         return implode('', $uriParts);
@@ -216,6 +185,7 @@ class Parser
     public function setSchema($schema)
     {
         $this->schema = $schema;
+
         return $this;
     }
     
@@ -234,6 +204,7 @@ class Parser
     public function setUser($user)
     {
         $this->user = $user;
+
         return $this;
     }
     
@@ -270,6 +241,7 @@ class Parser
     public function setHost($host)
     {
         $this->host = $host;
+
         return $this;
     }
     
@@ -288,6 +260,7 @@ class Parser
     public function setPort($port)
     {
         $this->port = $port;
+
         return $this;
     }
     
@@ -306,6 +279,7 @@ class Parser
     public function setPath($path)
     {
         $this->path = $path;
+
         return $this;
     }
     
@@ -314,35 +288,36 @@ class Parser
      */
     public function getQueryString()
     {
-        $this->setQueryString(http_build_query($this->getQueryArray()));
-        return $this->queryString;
+        return http_build_query($this->getQuery());
     }
     
     /**
-     * @param mixed $queryString
+     * @param mixed $query
      * @return $this
      */
-    public function setQueryString($queryString)
+    public function setQueryString($query)
     {
-        $this->queryString = $queryString;
+        parse_str($query, $this->query);
+
         return $this;
     }
     
     /**
      * @return array
      */
-    public function getQueryArray()
+    public function getQuery()
     {
-        return $this->queryArray;
+        return $this->query;
     }
-    
+
     /**
-     * @param array $queryArray
+     * @param array $query
      * @return $this
      */
-    public function setQueryArray($queryArray)
+    public function setQuery(array $query)
     {
-        $this->queryArray = $queryArray;
+        $this->query = $query;
+
         return $this;
     }
     
@@ -350,18 +325,18 @@ class Parser
      * @param $name
      * @return bool
      */
-    public function hasQuery($name)
+    public function hasQueryParameter($name)
     {
-        return isset($this->queryArray[$name]);
+        return isset($this->query[$name]);
     }
     
     /**
      * @param $name
      * @return null
      */
-    public function getQuery($name)
+    public function getQueryParameter($name)
     {
-        return $this->hasQuery($name) ? $this->queryArray[$name] : null;
+        return $this->hasQuery($name) ? $this->query[$name] : null;
     }
     
     /**
@@ -369,9 +344,10 @@ class Parser
      * @param $value
      * @return $this
      */
-    public function setQuery($name, $value)
+    public function setQueryParameter($name, $value)
     {
-        $this->queryArray[$name] = $value;
+        $this->query[$name] = $value;
+
         return $this;
     }
     
@@ -384,6 +360,7 @@ class Parser
         if ($this->hasQuery($name)) {
             unset($name);
         }
+
         return $this;
     }
     
@@ -402,6 +379,7 @@ class Parser
     public function setFragment($fragment)
     {
         $this->fragment = $fragment;
+
         return $this;
     }
     
